@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1>三角形旋转矩阵</h1>
+    <h1>三角形旋转、平移矩阵</h1>
     <canvas id="canvas" width="400" height="400"></canvas>
     <script src="./lib/webgl-utils.js"></script>
     <script src="./lib/webgl-debug.js"></script>
@@ -24,20 +24,20 @@
       const gl = canvas.getContext("webgl");
       // 顶点着色器
       const VSHADER_SOURCE = `
-        attribute vec4 a_Position;
-        uniform mat4 u_xformMatrix;
-        void main()
-        {
-          gl_Position = u_xformMatrix * a_Position;
-        }
-      `;
+         attribute vec4 a_Position;
+         uniform mat4 u_xformMatrix;
+         void main()
+         {
+           gl_Position = u_xformMatrix * a_Position;
+         }
+       `;
       // 片元着色器
       const FSHADER_SOURCE = `
-        void main()
-        {
-          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-      `;
+         void main()
+         {
+           gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+         }
+       `;
       // 初始化着色器
       initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
       // 设置旋转的角度
@@ -62,14 +62,48 @@
       gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
       // 启用变量
       gl.enableVertexAttribArray(a_Position);
-      // 创建矩阵数据
+      // 创建旋转矩阵数据
+      /*
+       [
+         cosB, -sinB, 0, 0,
+         sinB, cosB, 0, 0,
+         0, 0, 1, 0,
+         0, 0, 0, 1
+       ]
+       */
+      // js 中矩阵按列主序
+      // const xformMatrix = new Float32Array([
+      //   cosB,
+      //   sinB,
+      //   0,
+      //   0,
+      //   -sinB,
+      //   cosB,
+      //   0,
+      //   0,
+      //   0,
+      //   0,
+      //   1,
+      //   0,
+      //   0,
+      //   0,
+      //   0,
+      //   1,
+      // ]);
+      // 创建平移矩阵的数据
+      /*
+      [
+        1, 0, 0, Tx,
+        0, 1, 0, Ty,
+        0, 0, 1, Tz,
+        0, 0, 0, 1
+      ]
+       */
+      const Tx = 0.5,
+        Ty = 0.5,
+        Tz = 0;
       const xformMatrix = new Float32Array([
-        cosB,
-        sinB,
-        0,
-        0,
-        -sinB,
-        cosB,
+        1,
         0,
         0,
         0,
@@ -79,6 +113,11 @@
         0,
         0,
         0,
+        1,
+        0,
+        Tx,
+        Ty,
+        Tz,
         1,
       ]);
       // 给矩阵变量赋值
