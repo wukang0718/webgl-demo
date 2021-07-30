@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>三角形旋转矩阵</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 顶点着色器
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        uniform mat4 u_xformMatrix;
+        void main()
+        {
+          gl_Position = u_xformMatrix * a_Position;
+        }
+      `;
+      // 片元着色器
+      const FSHADER_SOURCE = `
+        void main()
+        {
+          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+      `;
+      // 初始化着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+      // 设置旋转的角度
+      const ANGLE = 90.0;
+      // 获取旋转的弧度
+      const radian = (Math.PI * ANGLE) / 180;
+      // 获取 cos 和 sin 的值
+      const cosB = Math.cos(radian),
+        sinB = Math.sin(radian);
+      // 获取着色器变量位置
+      const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      const u_xformMatrix = gl.getUniformLocation(gl.program, "u_xformMatrix");
+      // 创建缓存区数据
+      const verteviers = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+      // 创建缓存区对象
+      const vertexBuffer = gl.createBuffer();
+      // 绑定缓冲区
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      // 给缓冲区对象写入数据
+      gl.bufferData(gl.ARRAY_BUFFER, verteviers, gl.STATIC_DRAW);
+      // 吧缓冲区赋值给变量
+      gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+      // 启用变量
+      gl.enableVertexAttribArray(a_Position);
+      // 创建矩阵数据
+      const xformMatrix = new Float32Array([
+        cosB,
+        sinB,
+        0,
+        0,
+        -sinB,
+        cosB,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+      ]);
+      // 给矩阵变量赋值
+      gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+      // 设置背景颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      // 清除画布
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 绘制三角形
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    </script>
+  </body>
+</html>
