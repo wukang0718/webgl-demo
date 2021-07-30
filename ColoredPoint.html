@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>在点击位置绘制点</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 顶点着色器
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        void main()
+        {
+          gl_Position = a_Position;
+          gl_PointSize = 10.0;
+        }
+      `;
+      // 片元着色器
+      const FSHADER_SOURCE = `
+        precision mediump float;
+        uniform vec4 u_FragColor;
+        void main()
+        {
+          gl_FragColor = u_FragColor;
+        }
+      `;
+      // 初始化着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+      // 获取变量地址
+      const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      const u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
+      // 设置背景颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 存储所有的点的信息
+      const points = [];
+      // 给canvas 绑定事件
+      canvas.addEventListener("click", (event) => {
+        const { x: canvasX, y: canvasY } = canvas.getBoundingClientRect();
+        const pointX = event.clientX - canvasX;
+        const pointY = event.clientY - canvasY;
+        const color =
+          pointX >= canvas.width / 2 && pointY >= canvas.height / 2
+            ? [1.0, 0.0, 0.0, 1.0]
+            : pointX < canvas.width / 2 && pointY < canvas.height / 2
+            ? [0.0, 1.0, 0.0, 1.0]
+            : [1.0, 1.0, 1.0, 1.0];
+        points.push({ x: pointX, y: pointY, color: color });
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        points.forEach(({ x, y, color }) => {
+          gl.vertexAttrib3f(
+            a_Position,
+            (x - canvas.width / 2) / (canvas.width / 2),
+            (canvas.height / 2 - y) / (canvas.height / 2),
+            1.0
+          );
+          const colorFloat = new Float32Array(color);
+          gl.uniform4fv(u_FragColor, colorFloat);
+          gl.drawArrays(gl.POINTS, 0, 1);
+        });
+      });
+    </script>
+  </body>
+</html>

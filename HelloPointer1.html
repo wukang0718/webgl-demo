@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>绘制一个点</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+
+      // 顶点着色器 设置位置和大小
+      const VSHADER_SOURCE = `
+        void main()
+        {
+          gl_Position = vec4(0.5, -0.5, 0.0, 1.0); // 表示顶点的位置 必须要赋值
+          gl_PointSize = 10.0; // 表示顶点的尺寸 有默认值1.0
+        }
+      `;
+
+      // 片元着色器  设置颜色
+      const FSHADER_SOURCE = `
+        void main()
+        {
+          gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); // 控制像素在屏幕上的最终颜色
+        }
+      `;
+
+      // 初始话着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+
+      gl.clearColor(0.0, 1.0, 1.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.drawArrays(gl.POINTS, 0, 1);
+    </script>
+  </body>
+</html>

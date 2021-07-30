@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>三角形旋转</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 顶点着色器
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        uniform float u_CosB, u_SinB;
+        void main()
+        {
+          gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
+          gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
+          gl_Position.z = a_Position.z;
+          gl_Position.w = 1.0;
+        }
+      `;
+      // 片元着色器
+      const FSHADER_SOURCE = `
+        void main()
+        {
+          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+      `;
+      // 初始化着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+      // 获取着色器变量位置
+      const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      const u_CosB = gl.getUniformLocation(gl.program, "u_CosB");
+      const u_SinB = gl.getUniformLocation(gl.program, "u_SinB");
+      // 创建缓冲区数据
+      const verticers = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+      // 创建缓冲区对象
+      const vertexBuffer = gl.createBuffer();
+      // 绑定缓冲区对象
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      // 给缓冲区对象写入数据
+      gl.bufferData(gl.ARRAY_BUFFER, verticers, gl.STATIC_DRAW);
+      // 把缓冲区对象赋值给变量
+      gl.vertexAttribPointer(
+        gl.ARRAY_BUFFERa_Position,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0
+      );
+      // 启用变量
+      gl.enableVertexAttribArray(a_Position);
+      // 获取旋转的弧度
+      const ANGLE = 90.0;
+      const radian = (Math.PI * ANGLE) / 180.0; // 旋转的弧度
+      const cosB = Math.cos(radian);
+      const sinB = Math.sin(radian);
+      // 给变量赋值
+      gl.uniform1f(u_CosB, cosB);
+      gl.uniform1f(u_SinB, sinB);
+      // 设置背景颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      // 清除画布
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 绘制三角形
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    </script>
+  </body>
+</html>

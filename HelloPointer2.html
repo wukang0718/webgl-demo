@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>动态绘制一个点</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 顶点着色器
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        attribute float a_PointSize;
+        void main()
+        {
+          gl_Position = a_Position;
+          gl_PointSize = a_PointSize;
+        }
+      `;
+      // 片元着色器
+      const FSHADER_SOURCE = `
+        void main()
+        {
+          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+      `;
+
+      // 初始化着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+
+      // 获取到变量的位置
+      const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      const a_PointSize = gl.getAttribLocation(gl.program, "a_PointSize");
+      // 给变量赋值
+      // gl.vertexAttrib4f(a_Position, 0.5, 0.5, 0.0, 1.0);
+      // 两种方式
+      const position = new Float32Array([0.5, 0.5, 0.0, 1.0]);
+      gl.vertexAttrib4fv(a_Position, position);
+
+      gl.vertexAttrib1f(a_PointSize, 20.0);
+
+      // 设置背景颜色
+      gl.clearColor(0.0, 1.0, 1.0, 1.0);
+      // 清空画布
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 绘制顶点
+      gl.drawArrays(gl.POINTS, 0, 1);
+    </script>
+  </body>
+</html>

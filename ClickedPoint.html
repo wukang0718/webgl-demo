@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl - HelloCanvas</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>在点击位置绘制点</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script>
+      /** @type {HTMLCanvasElement} */
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 顶点着色器
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        void main()
+        {
+          gl_Position = a_Position;
+          gl_PointSize = 10.0;
+        }
+      `;
+      // 片元着色器
+      const FSHADER_SOURCE = `
+        void main()
+        {
+          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+      `;
+      // 初始化着色器
+      initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+      // 获取变量地址
+      const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      // 设置背景颜色
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      // 清空画布
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 给canvas 绑定点击事件
+      const points = [];
+      canvas.addEventListener("click", (event) => {
+        const { x, y } = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - x;
+        const mouseY = event.clientY - y;
+        points.push({ mouseX, mouseY });
+        // 清空画布
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        // 绘制所有的点
+        points.forEach(({ mouseX, mouseY }) => {
+          gl.vertexAttrib3f(
+            a_Position,
+            // 计算一个 -1.0 到 1.0 的值
+            (mouseX - canvas.width / 2) / (canvas.width / 2),
+            (canvas.height / 2 - mouseY) / (canvas.height / 2),
+            1.0
+          );
+          gl.drawArrays(gl.POINTS, 0, 1);
+        });
+      });
+    </script>
+  </body>
+</html>
