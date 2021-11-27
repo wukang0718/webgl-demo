@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1>在点击位置绘制点</h1>
+    <h1>绘制三个大小不一样的点</h1>
     <canvas id="canvas" width="400" height="400"></canvas>
     <script src="./lib/webgl-utils.js"></script>
     <script src="./lib/webgl-debug.js"></script>
@@ -25,10 +25,11 @@
       // 顶点着色器
       const VSHADER_SOURCE = `
         attribute vec4 a_Position;
+        attribute float a_PointSize;
         void main()
         {
           gl_Position = a_Position;
-          gl_PointSize = 10.0;
+          gl_PointSize = a_PointSize;
         }
       `;
       // 片元着色器
@@ -40,36 +41,34 @@
       `;
       // 初始化着色器
       initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
-      // 获取变量地址
+      // 获取顶点着色器变量位置
       const a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      const a_PointSize = gl.getAttribLocation(gl.program, "a_PointSize");
+      // 创建缓冲区数据
+      const verticers = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+      const sizeVertices = new Float32Array([10.0, 20.0, 30.0]);
+      // 创建缓冲区对象
+      const vertexBuffer = gl.createBuffer();
+      // 绑定缓冲区对象
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      // 给缓冲区对象写入数据
+      gl.bufferData(gl.ARRAY_BUFFER, verticers, gl.STATIC_DRAW);
+      // 把缓冲区赋值给变量
+      gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+      // 启用变量
+      gl.enableVertexAttribArray(a_Position);
+      // 设置顶点大小的缓冲区
+      const sizeVertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, sizeVertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, sizeVertices, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_PointSize, 1, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(a_PointSize);
       // 设置背景颜色
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
-      // 清空画布
+      // 清除画布
       gl.clear(gl.COLOR_BUFFER_BIT);
-      // 给canvas 绑定点击事件
-      const points = [];
-      canvas.addEventListener("click", (event) => {
-        const { x, y } = canvas.getBoundingClientRect();
-        const mouseX = event.clientX - x;
-        const mouseY = event.clientY - y;
-        points.push({
-          x: (mouseX - canvas.width / 2) / (canvas.width / 2), 
-          y: (canvas.height / 2 - mouseY) / (canvas.height / 2)
-         });
-        // 清空画布
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        // 绘制所有的点
-        points.forEach(({ x, y }) => {
-          gl.vertexAttrib3f(
-            a_Position,
-            // 计算一个 -1.0 到 1.0 的值
-            x,
-            y,
-            1.0
-          );
-          gl.drawArrays(gl.POINTS, 0, 1);
-        });
-      });
+      // 绘制三角形
+      gl.drawArrays(gl.POINTS, 0, 3);
     </script>
   </body>
 </html>
