@@ -83,6 +83,7 @@ function main() {
       // If Clicked position is inside the <canvas>, update the selected surface
       var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
       var face = checkFace(gl, n, x_in_canvas, y_in_canvas, currentAngle, u_PickedFace, viewProjMatrix, u_MvpMatrix);
+      console.log(face);
       gl.uniform1i(u_PickedFace, face); // Pass the surface number to u_PickedFace
       draw(gl, n, currentAngle, viewProjMatrix, u_MvpMatrix);
     }
